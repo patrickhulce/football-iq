@@ -14,7 +14,7 @@ conda activate football-iq
 ```sh
 conda activate football-iq
 conda install pytorch torchvision -c pytorch # Or whatever deps you're adding.
-conda env export --from-history > environment.yml # Update and commit the environment file.
+conda env export > environment.yml # Update and commit the environment file.
 ```
 
 ## Prerequisites
