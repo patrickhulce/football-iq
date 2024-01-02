@@ -1,2 +1,4 @@
 output/
 data/videos/_*
+
+.ipynb_checkpoints
