@@ -11,4 +11,6 @@ dependencies:
   - torchvision
   - ipykernel
   - scikit-learn
+  - pip:
+      - opencv-contrib-python==4.9.0.80
 prefix: /opt/conda/envs/football-iq
