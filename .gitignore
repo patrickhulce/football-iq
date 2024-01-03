@@ -3,3 +3,4 @@ data/videos/_*
 
 .ipynb_checkpoints
 __pycache__
+*.pth
