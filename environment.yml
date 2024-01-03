@@ -4,9 +4,11 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.11
+  - matplotlib
   - pytorch
+  - python=3.11
   - torchaudio
   - torchvision
-  - matplotlib
+  - ipykernel
+  - scikit-learn
 prefix: /opt/conda/envs/football-iq
