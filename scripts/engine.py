@@ -12,13 +12,14 @@ from coco_utils import get_coco_api_from_dataset
 def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, scaler=None):
     model.train()
     metric_logger = utils.MetricLogger(delimiter="  ")
-    metric_logger.add_meter("lr", utils.SmoothedValue(window_size=1, fmt="{value:.6f}"))
+    metric_logger.add_meter("lr", utils.SmoothedValue(
+        window_size=1, fmt="{value:.6f}"))
     header = f"Epoch: [{epoch}]"
 
     lr_scheduler = None
     if epoch == 0:
-        warmup_factor = 1.0 / 1000
         warmup_iters = min(1000, len(data_loader) - 1)
+        warmup_factor = 1.0 / warmup_iters
 
         lr_scheduler = torch.optim.lr_scheduler.LinearLR(
             optimizer, start_factor=warmup_factor, total_iters=warmup_iters
@@ -26,7 +27,8 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, sc
 
     for images, targets in metric_logger.log_every(data_loader, print_freq, header):
         images = list(image.to(device) for image in images)
-        targets = [{k: v.to(device) if isinstance(v, torch.Tensor) else v for k, v in t.items()} for t in targets]
+        targets = [{k: v.to(device) if isinstance(
+            v, torch.Tensor) else v for k, v in t.items()} for t in targets]
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             loss_dict = model(images, targets)
             losses = sum(loss for loss in loss_dict.values())
@@ -94,14 +96,17 @@ def evaluate(model, data_loader, device):
         model_time = time.time()
         outputs = model(images)
 
-        outputs = [{k: v.to(cpu_device) for k, v in t.items()} for t in outputs]
+        outputs = [{k: v.to(cpu_device) for k, v in t.items()}
+                   for t in outputs]
         model_time = time.time() - model_time
 
-        res = {target["image_id"]: output for target, output in zip(targets, outputs)}
+        res = {target["image_id"]: output for target,
+               output in zip(targets, outputs)}
         evaluator_time = time.time()
         coco_evaluator.update(res)
         evaluator_time = time.time() - evaluator_time
-        metric_logger.update(model_time=model_time, evaluator_time=evaluator_time)
+        metric_logger.update(model_time=model_time,
+                             evaluator_time=evaluator_time)
 
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
