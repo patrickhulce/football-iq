@@ -18,7 +18,12 @@ class FootballDataset(torch.utils.data.Dataset):
         self.transforms = transforms
         images = list(sorted(os.listdir(frame_directory)))
         self.imgs = [img for img in images if not "-mask" in img]
-        self.masks = [img for img in images if img.endswith("-mask.png")]
+        self.masks = [img.replace(".jpg", "-mask.png") for img in self.imgs]
+
+        for img in self.masks:
+            if not img in images:
+                raise Exception(
+                    f"Mask file {img} not found for image {img.replace('-mask', '')}")
 
     def __getitem__(self, idx):
         # load images and masks
@@ -26,7 +31,7 @@ class FootballDataset(torch.utils.data.Dataset):
         mask_path = os.path.join(self.frame_directory, self.masks[idx])
         img = read_image(img_path)
         mask = read_image(mask_path)
-        target = process_mask(mask, idx)
+        target = process_mask(mask, idx, filename=self.masks[idx])
 
         # Wrap sample and targets into torchvision tv_tensors:
         img = tv_tensors.Image(img)
@@ -84,9 +89,9 @@ def main():
     dataset_test = FootballDataset('data/frames', get_transform(train=False))
 
     # split the dataset in train and test set
-    # indices = torch.randperm(len(dataset)).tolist()
-    # dataset = torch.utils.data.Subset(dataset, indices[:-50])
-    # dataset_test = torch.utils.data.Subset(dataset_test, indices[-50:])
+    indices = torch.randperm(len(dataset)).tolist()
+    dataset = torch.utils.data.Subset(dataset, indices[:-50])
+    dataset_test = torch.utils.data.Subset(dataset_test, indices[-50:])
 
     # define training and validation data loaders
     data_loader = torch.utils.data.DataLoader(
@@ -115,7 +120,7 @@ def main():
     params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.SGD(
         params,
-        lr=0.005,
+        lr=0.002,
         momentum=0.9,
         weight_decay=0.0005
     )
@@ -127,8 +132,8 @@ def main():
         gamma=0.1
     )
 
-    # let's train it just for 2 epochs
-    num_epochs = 2
+    # let's train it just for 10 epochs
+    num_epochs = 10
 
     for epoch in range(num_epochs):
         # train for one epoch, printing every 10 iterations
